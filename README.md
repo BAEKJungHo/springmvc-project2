@@ -193,3 +193,83 @@ request.getParameter("data") 처럼 불편하게 접근해야 한다.
 ```html
 <span th:text="${#temporals.format(localDateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
 ```
+
+### URL 링크
+
+타임리프에서 URL을 생성할 때는 `@{...}` 문법을 사용하면 된다.
+
+- 단순한 URL
+  - @{/hello} /hello
+- 쿼리 파라미터
+  - @{/hello(param1=${param1}, param2=${param2})}
+  - /hello?param1=data1&param2=data2
+  - () 에 있는 부분은 쿼리 파라미터로 처리된다.
+- 경로 변수
+  - @{/hello/{param1}/{param2}(param1=${param1}, param2=${param2})}
+  - /hello/data1/data2
+  - URL 경로상에 변수가 있으면 () 부분은 경로 변수로 처리된다.
+- 경로 변수 + 쿼리 파라미터
+  - @{/hello/{param1}(param1=${param1}, param2=${param2})}
+  - /hello/data1?param2=data2
+  - 경로 변수와 쿼리 파라미터를 함께 사용할 수 있다.
+
+상대경로, 절대경로, 프로토콜 기준을 표현할 수 도 있다.
+
+- /hello : 절대 경로
+- hello : 상대 경로
+
+> 참고: https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#link-urls
+
+### 리터럴(Literals)
+
+리터럴은 소스 코드상에 고정된 값을 말하는 용어이다.
+
+예를 들어서 다음 코드에서 "Hello" 는 문자 리터럴, 10, 20 는 숫자 리터럴이다.
+
+```
+String a = "Hello"
+int a = 10 * 20
+```
+
+타임리프는 다음과 같은 리터럴이 있다.
+
+- 문자: 'hello'
+- 숫자: 10
+- 불린: true , false
+- null: null
+
+타임리프에서 문자 리터럴은 항상 `'' (작은 따옴표)`로 감싸야 한다.
+
+`<span th:text="'hello'">`
+
+그런데 문자를 항상 ' 로 감싸는 것은 너무 귀찮은 일이다. 공백 없이 쭉 이어진다면 하나의 의미있는
+토큰으로 인지해서 다음과 같이 작은 따옴표를 생략할 수 있다. 
+
+`룰: A-Z , a-z , 0-9 , [] , . , - , _`
+
+`<span th:text="hello">`
+
+- 오류
+  - `<span th:text="hello world!"></span>`
+  - 문자 리터럴은 원칙상 ' 로 감싸야 한다. 중간에 공백이 있어서 하나의 의미있는 토큰으로도 인식되지 않는다.
+- 수정
+  - `<span th:text="'hello world!'"></span>`
+  - 이렇게 ' 로 감싸면 정상 동작한다.
+
+#### 리터럴 대체(Literal substitutions)
+
+`<span th:text="|hello ${data}|">`
+
+마지막의 리터럴 대체 문법을 사용하면 마치 템플릿을 사용하는 것 처럼 편리하다.
+
+### 연산
+
+타임리프 연산은 자바와 크게 다르지 않다. HTML안에서 사용하기 때문에 HTML 엔티티를 사용하는 부분만 주의하자.
+
+
+- 비교연산: HTML 엔티티를 사용해야 하는 부분을 주의하자, 
+  - `> (gt), < (lt), >= (ge), <= (le), ! (not), == (eq), != (neq, ne)`
+- 조건식: 자바의 조건식과 유사하다.
+- Elvis 연산자: 조건식의 편의 버전
+- No-Operation: `_` 인 경우 마치 타임리프가 실행되지 않는 것 처럼 동작한다. 이것을 잘 사용하면 HTML 의 내용 그대로 활용할 수 있다. 마지막 예를 보면 데이터가 없습니다. 부분이 그대로 출력된다.
+
