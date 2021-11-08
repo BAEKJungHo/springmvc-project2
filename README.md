@@ -119,3 +119,15 @@ HTML 엔티티로 변경하는 것을 `이스케이프(escape)`라 한다. 그�
     - `map.get("userA").getUsername()`
     - `userMap['userA']['username']` : 위와 같음
     - `userMap['userA'].getUsername()` : Map에서 userA를 찾고 메서드 직접 호출
+
+#### 지역 변수 선언
+
+`th:with` 를 사용하면 지역 변수를 선언해서 사용할 수 있다. 지역 변수는 선언한 테그 안에서만 사용할 수
+있다.
+
+```html
+<h1>지역 변수 - (th:with)</h1>
+<div th:with="first=${users[0]}">
+ <p>처음 사람의 이름은 <span th:text="${first.username}"></span></p>
+</div>
+```
