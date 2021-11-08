@@ -131,3 +131,65 @@ HTML 엔티티로 변경하는 것을 `이스케이프(escape)`라 한다. 그�
  <p>처음 사람의 이름은 <span th:text="${first.username}"></span></p>
 </div>
 ```
+
+### 기본 객체들
+
+타임리프는 기본 객체들을 제공한다.
+
+- ${#request}
+- ${#response}
+- ${#session}
+- ${#servletContext}
+- ${#locale}
+ 
+그런데 #request 는 HttpServletRequest 객체가 그대로 제공되기 때문에 데이터를 조회하려면
+request.getParameter("data") 처럼 불편하게 접근해야 한다.
+
+이런 점을 해결하기 위해 편의 객체도 제공한다.
+
+- HTTP 요청 파라미터 접근: param
+  - Ex. ${param.paramData}
+- HTTP 세션 접근: session
+  - Ex. ${session.sessionData}
+- 스프링 빈 접근: @
+  - Ex. ${@helloBean.hello('Spring!')}
+
+### 유틸리티 객체와 날짜
+
+타임리프는 문자, 숫자, 날짜, URI등을 편리하게 다루는 다양한 유틸리티 객체들을 제공한다.
+
+- 타임리프 유틸리티 객체들
+  - #message : 메시지, 국제화 처리
+  - #uris : URI 이스케이프 지원
+  - #dates : java.util.Date 서식 지원
+  - #calendars : java.util.Calendar 서식 지원
+  - #temporals : 자바8 날짜 서식 지원
+  - #numbers : 숫자 서식 지원
+  - #strings : 문자 관련 편의 기능
+  - #objects : 객체 관련 기능 제공
+  - #bools : boolean 관련 기능 제공
+  - #arrays : 배열 관련 기능 제공
+  - #lists , #sets , #maps : 컬렉션 관련 기능 제공
+  - #ids : 아이디 처리 관련 기능 제공, 뒤에서 설명
+
+- 타임리프 유틸리티 객체
+  - https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#expression-utility-objects
+- 유틸리티 객체 예시
+  - https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#appendix-b-expression-utility-objects
+
+> 이런 유틸리티 객체들은 대략 이런 것이 있다 알아두고, 필요할 때 찾아서 사용하면 된다.
+
+
+#### 자바8 날짜
+
+타임리프에서 자바8 날짜인 LocalDate , LocalDateTime , Instant 를 사용하려면 추가 라이브러리가
+필요하다. 스프링 부트 타임리프를 사용하면 해당 라이브러리가 자동으로 추가되고 통합된다.
+
+- 타임리프 자바8 날짜 지원 라이브러리
+  - `thymeleaf-extras-java8time`
+- 자바8 날짜용 유틸리티 객체
+  - `#temporals`
+
+```html
+<span th:text="${#temporals.format(localDateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+```
