@@ -336,6 +336,47 @@ int a = 10 * 20
 
 ### 주석
 
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+ <meta charset="UTF-8">
+ <title>Title</title>
+</head>
+<body>
+<h1>예시</h1>
+<span th:text="${data}">html data</span>
+<h1>1. 표준 HTML 주석</h1>
+<!--
+<span th:text="${data}">html data</span>
+-->
+<h1>2. 타임리프 파서 주석</h1>
+<!--/* [[${data}]] */-->
+<!--/*-->
+<span th:text="${data}">html data</span>
+<!--*/-->
+<h1>3. 타임리프 프로토타입 주석</h1>
+<!--/*/
+<span th:text="${data}">html data</span>
+/*/-->
+</body>
+</html>
+```
+
+- 결과
+
+```html
+<h1>예시</h1>
+<span>Spring!</span>
+<h1>1. 표준 HTML 주석</h1>
+<!--
+<span th:text="${data}">html data</span>
+-->
+<h1>2. 타임리프 파서 주석</h1>
+<h1>3. 타임리프 프로토타입 주석</h1>
+<span>Spring!</span>
+```
+
 1. 표준 HTML 주석
 자바스크립트의 표준 HTML 주석은 타임리프가 렌더링 하지 않고, 그대로 남겨둔다.
 
