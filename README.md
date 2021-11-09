@@ -664,11 +664,25 @@ FormItemController : item.open=null //체크 박스를 선택하지 않는 경�
 위 코드와 아래 코드는 동일하다.
 
 ```
-<input type="checkbox" id="open" th:field="*{open}" class="form-checkinput">
+<input type="checkbox" id="open" th:field="*{open}" class="form-check-input">
 ```
 
 타임리프를 사용하면 체크 박스의 히든 필드와 관련된 부분도 함께 해결해준다. HTML 생성 결과를 보면
 히든 필드 부분이 자동으로 생성되어 있다.
+
+- 타임리프의 체크 확인
+
+```html
+<input type="checkbox" id="open" th:field="${item.open}" class="form-check-input" disabled>
+```
+
+th:field 를 사용하면 값이 true 인 경우에 체크를 자동으로 처리해 준다.
+
+- 생성 결과
+
+```html
+<input type="checkbox" id="open" class="form-check-input" disabled name="open" value="true" checked="checked">
+```
 
 ### 체크 박스 멀티
 
