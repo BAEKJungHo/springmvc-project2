@@ -659,6 +659,17 @@ FormItemController : item.open=true //체크 박스를 선택하는 경우
 FormItemController : item.open=null //체크 박스를 선택하지 않는 경우
 ```
 
+하지만 매번 코드에 hidden 값을 넣으려면 불편하다. 타임리프는 이런 부분을 해결해 준다.
+
+위 코드와 아래 코드는 동일하다.
+
+```
+<input type="checkbox" id="open" th:field="*{open}" class="form-checkinput">
+```
+
+타임리프를 사용하면 체크 박스의 히든 필드와 관련된 부분도 함께 해결해준다. HTML 생성 결과를 보면
+히든 필드 부분이 자동으로 생성되어 있다.
+
 ### 체크 박스 멀티
 
 ```java
