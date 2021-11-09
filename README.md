@@ -643,6 +643,22 @@ HTML checkbox는 선택이 안되면 클라이언트에서 서버로 값 자체�
   - 체크 박스를 체크하지 않으면 스프링 MVC가 `_open` 만 있는 것을 확인하고, open 의 값이 체크되지 않았다고 인식한다.
   - 이 경우 서버에서 Boolean 타입을 찍어보면 결과가 null 이 아니라 false 인 것을 확인할 수 있다. log.info("item.open={}", item.getOpen());
 
+```html
+<div>판매 여부</div>
+<div>
+    <div class="form-check">
+        <input type="checkbox" id="open" name="open" class="form-check-input">
+        <input type="hidden" name="_open" value="on"/> <!-- 히든 필드 추가 -->
+        <label for="open" class="form-check-label">판매 오픈</label>
+    </div>
+</div>
+```
+
+```
+FormItemController : item.open=true //체크 박스를 선택하는 경우
+FormItemController : item.open=null //체크 박스를 선택하지 않는 경우
+```
+
 ### 체크 박스 멀티
 
 ```java
