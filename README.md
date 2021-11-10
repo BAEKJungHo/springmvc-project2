@@ -775,4 +775,162 @@ public List<DeliveryCode> deliveryCodes() {
 </div>
 ```
 
+## 메시지, 국제화
 
+악덕? 기획자가 화면에 보이는 문구가 마음에 들지 않는다고, `상품명`이라는 단어를 모두 `상품이름`으로 고쳐달라고 하면 어떻게 해야할까?
+여러 화면에 보이는 상품명, 가격, 수량 등, label 에 있는 단어를 변경하려면 다음 화면들을 다 찾아가면서
+모두 변경해야 한다. 지금처럼 화면 수가 적으면 문제가 되지 않지만 화면이 수십개 이상이라면 수십개의
+파일을 모두 고쳐야 한다.
+
+왜냐하면 해당 HTML 파일에 메시지가 하드코딩 되어 있기 때문이다.
+이런 다양한 메시지를 한 곳에서 관리하도록 하는 기능을 `메시지 기능`이라 한다.
+
+예를 들어서, messages.properties 라는 메시지 관리용 파일을 만들고
+
+```
+item=상품
+item.id=상품 ID
+...
+```
+
+- addForm.html
+  - `<label for="itemName" th:text="#{item.itemName}"></label>`
+- editForm.html
+  - `<label for="itemName" th:text="#{item.itemName}"></label>`
+
+이런식으로 관리한다.
+
+- 국제화
+
+메시지에서 한 발 더 나가보자.
+메시지에서 설명한 메시지 파일(messages.properteis)을 각 나라별로 별도로 관리하면 서비스를
+국제화 할 수 있다.
+예를 들어서 다음과 같이 2개의 파일을 만들어서 분류한다.
+
+- messages_en.properties
+
+```
+item=Item
+item.id=Item ID
+item.itemName=Item Name
+item.price=price
+item.quantity=quantity
+```
+
+- messages.ko.properties
+
+```
+item=상품
+item.id=상품 ID
+item.itemName=상품명
+item.price=가격
+item.quantity=수량
+```
+
+영어를 사용하는 사람이면 messages_en.propertis 를 사용하고,
+한국어를 사용하는 사람이면 messages_ko.propertis 를 사용하게 개발하면 된다.
+이렇게 하면 사이트를 국제화 할 수 있다.
+한국에서 접근한 것인지 영어에서 접근한 것인지는 인식하는 방법은 `HTTP accept-language` 해더 값을
+사용하거나 사용자가 직접 언어를 선택하도록 하고, 쿠키 등을 사용해서 처리하면 된다.
+
+메시지와 국제화 기능을 직접 구현할 수도 있겠지만, 스프링은 기본적인 메시지와 국제화 기능을 모두
+제공한다. 그리고 타임리프도 스프링이 제공하는 메시지와 국제화 기능을 편리하게 통합해서 제공한다.
+지금부터 스프링이 제공하는 메시지와 국제화 기능을 알아보자.
+
+### 스프링 메시지 소스 설정
+
+스프링은 기본적인 메시지 관리 기능을 제공한다.
+메시지 관리 기능을 사용하려면 스프링이 제공하는 `MessageSource` 를 스프링 빈으로 등록하면 되는데,
+MessageSource 는 인터페이스이다. 따라서 구현체인 `ResourceBundleMessageSource` 를 스프링 빈으로
+등록하면 된다.
+
+- 직접 등록
+
+```java
+@Bean
+public MessageSource messageSource() {
+ ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+ messageSource.setBasenames("messages", "errors");
+ messageSource.setDefaultEncoding("utf-8");
+ return messageSource;
+}
+```
+
+- `basenames` : 설정 파일의 이름을 지정한다.
+  - messages 로 지정하면 messages.properties 파일을 읽어서 사용한다.
+  - 추가로 국제화 기능을 적용하려면 messages_en.properties , messages_ko.properties 와 같이 파일명 마지막에 언어 정보를 주면된다. 만약 찾을 수 있는 국제화 파일이 없으면
+messages.properties (언어정보가 없는 파일명)를 기본으로 사용한다.
+  - 파일의 위치는 /resources/messages.properties 에 두면 된다.
+  - 여러 파일을 한번에 지정할 수 있다. 여기서는 messages , errors 둘을 지정했다.
+  - defaultEncoding : 인코딩 정보를 지정한다. utf-8 을 사용하면 된다.
+
+- 스프링 부트
+  - 스프링 부트를 사용하면 스프링 부트가 `MessageSource` 를 자동으로 스프링 빈으로 등록한다.
+- 스프링 부트 메시지 소스 설정
+  - application.properties
+    - `spring.messages.basename=messages,config.i18n.messages`
+
+- 스프링 부트 메시지 소스 기본 값
+  - `spring.messages.basename=messages`
+  - MessageSource 를 스프링 빈으로 등록하지 않고, 스프링 부트와 관련된 별도의 설정을 하지 않으면 messages 라는 이름으로 기본 등록된다. 따라서 messages_en.properties ,messages_ko.properties , messages.properties 파일만 등록하면 자동으로 인식된다.
+
+### 메시지 파일 만들기
+
+메시지 파일을 만들어보자. 국제화 테스트를 위해서 messages_en 파일도 추가하자.
+
+- messages.properties :기본 값으로 사용(한글)
+- messages_en.properties : 영어 국제화 사용
+
+> 주의! 파일명은 massage가 아니라 messages다! 마지막 s에 주의하자
+
+### 국제화 파일 선택
+
+- locale 정보를 기반으로 국제화 파일을 선택한다.
+- Locale이 en_US 의 경우 messages_en_US messages_en messages 순서로 찾는다.
+- Locale 에 맞추어 구체적인 것이 있으면 구체적인 것을 찾고, 없으면 디폴트를 찾는다고 이해하면 된다.
+
+```java
+@Test
+void defaultLang() {
+ assertThat(ms.getMessage("hello", null, null)).isEqualTo("안녕");
+ assertThat(ms.getMessage("hello", null, Locale.KOREA)).isEqualTo("안녕");
+}
+```
+
+- ms.getMessage("hello", null, null) : locale 정보가 없으므로 messages 를 사용
+- ms.getMessage("hello", null, Locale.KOREA) : locale 정보가 있지만, message_ko 가 없으므로 messages 를 사용
+
+```java
+@Test
+void enLang() {
+ assertThat(ms.getMessage("hello", null,
+Locale.ENGLISH)).isEqualTo("hello");
+}
+```
+
+- ms.getMessage("hello", null, Locale.ENGLISH) : locale 정보가 Locale.ENGLISH 이므로 messages_en 을 찾아서 사용
+
+### 웹으로 확인하기
+
+웹 브라우저의 언어 설정 값을 변경하면서 국제화 적용을 확인해보자.
+
+`크롬 브라우저 -> 설정 -> 언어`를 검색하고, 우선 순위를 변경하면 된다.
+
+우선순위를 영어로 변경하고 테스트해보자.
+웹 브라우저의 언어 설정 값을 변경하면 요청시 `Accept-Language` 의 값이 변경된다.
+
+Accept-Language 는 클라이언트가 서버에 기대하는 언어 정보를 담아서 요청하는 HTTP 요청 헤더이다.
+(더 자세한 내용은 모든 개발자를 위한 HTTP 웹 기본지식 강의를 참고하자.)
+
+### LocaleResolver
+
+스프링은 Locale 선택 방식을 변경할 수 있도록 LocaleResolver 라는 인터페이스를 제공하는데, 
+스프링 부트는 기본으로 Accept-Language 를 활용하는 AcceptHeaderLocaleResolver 를 사용한다.
+
+```java
+public interface LocaleResolver {
+Locale resolveLocale(HttpServletRequest request);
+void setLocale(HttpServletRequest request, @Nullable HttpServletResponse 
+response, @Nullable Locale locale);
+}
+```
