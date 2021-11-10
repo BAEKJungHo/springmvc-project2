@@ -874,6 +874,51 @@ messages.properties (언어정보가 없는 파일명)를 기본으로 사용한
   - `spring.messages.basename=messages`
   - MessageSource 를 스프링 빈으로 등록하지 않고, 스프링 부트와 관련된 별도의 설정을 하지 않으면 messages 라는 이름으로 기본 등록된다. 따라서 messages_en.properties ,messages_ko.properties , messages.properties 파일만 등록하면 자동으로 인식된다.
 
+```java
+@SpringBootTest
+public class MessageSourceTest {
+
+    @Autowired
+    MessageSource messageSource;
+
+    @Test
+    void helloMessage() throws Exception {
+        String result = messageSource.getMessage("hello", null, null);
+        assertThat(result).isEqualTo("안녕");
+    }
+
+    @Test
+    void notFoundMessageCode() {
+        assertThatThrownBy(() -> messageSource.getMessage("no_code", null, null))
+                .isInstanceOf(NoSuchMessageException.class);
+    }
+
+    @Test
+    void notFoundMessageCodeDefaultMessage() {
+        String result = messageSource.getMessage("no_code", null, "기본 메시지", null);
+        assertThat(result).isEqualTo("기본 메시지");
+    }
+
+    @Test
+    void argumentMessage() throws Exception {
+        String message = messageSource.getMessage("hello.name", new Object[]{"Spring"}, null);
+        assertThat(message).isEqualTo("안녕 Spring");
+    }
+
+    @Test
+    void defaultLang() throws Exception {
+        assertThat(messageSource.getMessage("hello", null, null)).isEqualTo("안녕");
+        assertThat(messageSource.getMessage("hello", null, Locale.KOREA)).isEqualTo("안녕");
+    }
+
+    @Test
+    void enLang() {
+        assertThat(messageSource.getMessage("hello", null, Locale.ENGLISH)).isEqualTo("hello");
+    }
+
+}
+```
+
 ### 메시지 파일 만들기
 
 메시지 파일을 만들어보자. 국제화 테스트를 위해서 messages_en 파일도 추가하자.
