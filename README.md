@@ -955,6 +955,24 @@ Locale.ENGLISH)).isEqualTo("hello");
 
 - ms.getMessage("hello", null, Locale.ENGLISH) : locale 정보가 Locale.ENGLISH 이므로 messages_en 을 찾아서 사용
 
+### 타임리프 메시지 적용
+
+타임리프의 메시지 표현식 `#{...}`을 사용하면 스프링의 메시지를 편리하게 조회할 수 있다.
+예를 들어서, 방금 등록한 상품이라는 이름을 조회하려면 `#{label.item}` 이라고 하면 된다.
+
+- 페이지 이름에 적용
+  - `<h2>상품 등록 폼</h2>`
+    - `<h2 th:text="#{page.addItem}">상품 등록</h2>`
+- 레이블에 적용
+  - `<label for="itemName">상품명</label>`
+    - `<label for="itemName" th:text="#{label.item.itemName}">상품명</label>`
+    - `<label for="price" th:text="#{label.item.price}">가격</label>`
+    - `<label for="quantity" th:text="#{label.item.quantity}">수량</label>`
+- 버튼에 적용
+  - `<button type="submit">상품 등록</button>`
+    - `<button type="submit" th:text="#{button.save}">저장</button>`
+    - `<button type="button" th:text="#{button.cancel}">취소</button>`
+
 ### 웹으로 확인하기
 
 웹 브라우저의 언어 설정 값을 변경하면서 국제화 적용을 확인해보자.
