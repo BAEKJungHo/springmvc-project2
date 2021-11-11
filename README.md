@@ -1031,3 +1031,20 @@ __컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지를 
     </div>
 </div>
 ```
+
+- 글로벌 오류 처리
+
+```html
+<div th:if="${#fields.hasGlobalErrors()}">
+ <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">전체 오류 메시지</p>
+</div>
+```
+
+- 필드 오류 처리
+
+```html
+<input type="text" id="itemName" th:field="*{itemName}" th:errorclass="field-error" class="form-control" placeholder="이름을 입력하세요">
+<div class="field-error" th:errors="*{itemName}">
+ 상품명 오류
+</div>
+```
