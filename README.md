@@ -998,7 +998,7 @@ response, @Nullable Locale locale);
 }
 ```
 
-## 검증
+## [검증](https://github.com/BAEKJungHo/springmvc-project2/tree/main/validation/src)
 
 __컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지를 검증하는 것이다.__ 그리고 정상 로직보다 이런
 검증 로직을 잘 개발하는 것이 어쩌면 더 어려울 수 있다. 
@@ -1020,3 +1020,14 @@ __컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지를 
 - th:errorclass : th:field 에서 지정한 필드에 오류가 있으면 class 정보를 추가한다.
 - 검증과 오류 메시지 공식 메뉴얼
   - https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html#validation-and-error-messages
+
+```java
+<div>
+    <label for="price" th:text="#{label.item.price}">가격</label>
+    <input type="text" id="price" th:field="*{price}"
+           th:errorclass="field-error" class="form-control" placeholder="가격을 입력하세요">
+    <div class="field-error" th:errors="*{price}">
+        가격 오류
+    </div>
+</div>
+```
