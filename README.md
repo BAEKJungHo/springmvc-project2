@@ -1523,8 +1523,8 @@ public void init(WebDataBinder dataBinder) {
 public String addItemV6(@Validated @ModelAttribute Item item, BindingResult 
 bindingResult, RedirectAttributes redirectAttributes) {
  if (bindingResult.hasErrors()) {
- log.info("errors={}", bindingResult);
- return "validation/v2/addForm";
+   log.info("errors={}", bindingResult);
+   return "validation/v2/addForm";
  }
  //성공 로직
  Item savedItem = itemRepository.save(item);
@@ -1536,13 +1536,14 @@ bindingResult, RedirectAttributes redirectAttributes) {
 
 validator를 직접 호출하는 부분이 사라지고, 대신에 검증 대상 앞에 `@Validated` 가 붙었다.
 
+WebDataBinder 에 검증기를 추가하면 각 핸들러 메서드마다 validator.validate 같은 코드를 제거할 수 있다.
+
 #### 동작 방식
 
-@Validated 는 검증기를 실행하라는 애노테이션이다.
+`@Validated` 는 검증기를 실행하라는 애노테이션이다.
 이 애노테이션이 붙으면 앞서 WebDataBinder 에 등록한 검증기를 찾아서 실행한다. 그런데 여러 검증기를
-등록한다면 그 중에 어떤 검증기가 실행되어야 할지 구분이 필요하다. 이때 supports() 가 사용된다. 
-여기서는 supports(Item.class) 호출되고, 결과가 true 이므로 ItemValidator 의 validate() 가
-호출된다.
+등록한다면 그 중에 어떤 검증기가 실행되어야 할지 구분이 필요하다. 이때 `supports()` 가 사용된다. 
+여기서는 supports(Item.class) 호출되고, 결과가 true 이므로 ItemValidator 의 validate() 가 호출된다.
 
 ```java
 @Component
