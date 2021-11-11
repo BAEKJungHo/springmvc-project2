@@ -1021,7 +1021,7 @@ __컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지를 
 - 검증과 오류 메시지 공식 메뉴얼
   - https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html#validation-and-error-messages
 
-```java
+```html
 <div>
     <label for="price" th:text="#{label.item.price}">가격</label>
     <input type="text" id="price" th:field="*{price}"
