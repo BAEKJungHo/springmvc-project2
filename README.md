@@ -1556,6 +1556,8 @@ public class ItemValidator implements Validator {
 }
 ```
 
+`isAssignableFrom()` 을 쓰는 이유는 자식 클래스 까지 검증이 가능하기 때문이다.
+
 - 글로벌 설정 - 모든 컨트롤러에 다 적용
 
 ```java
