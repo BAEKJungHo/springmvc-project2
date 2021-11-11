@@ -1480,7 +1480,7 @@ typeMismatch.java.lang.Integer=숫자를 입력해주세요.
 typeMismatch=타입 오류입니다.
 ```
 
-## Validator 분리 1
+## [Validator 분리 1](https://github.com/BAEKJungHo/springmvc-project2/blob/main/validation/src/main/java/hello/itemservice/web/validation/ItemValidator.java)
 
 복잡한 검증 로직을 별도로 분리하자.
 
