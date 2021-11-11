@@ -1010,3 +1010,13 @@ __컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지를 
   - 서버만으로 검증하면, 즉각적인 고객 사용성이 부족해진다.
   - 둘을 적절히 섞어서 사용하되, 최종적으로 서버 검증은 필수
   - API 방식을 사용하면 API 스펙을 잘 정의해서 검증 오류를 API 응답 결과에 잘 남겨주어야 함
+
+### 타임리프 스프링 검증 오류 통합 기능
+
+타임리프는 스프링의 BindingResult 를 활용해서 편리하게 검증 오류를 표현하는 기능을 제공한다.
+
+- #fields : #fields 로 BindingResult 가 제공하는 검증 오류에 접근할 수 있다.
+- th:errors : 해당 필드에 오류가 있는 경우에 태그를 출력한다. th:if 의 편의 버전이다.
+- th:errorclass : th:field 에서 지정한 필드에 오류가 있으면 class 정보를 추가한다.
+- 검증과 오류 메시지 공식 메뉴얼
+  - https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html#validation-and-error-messages
