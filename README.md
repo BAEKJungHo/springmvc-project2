@@ -1583,3 +1583,115 @@ public class ItemServiceApplication implements WebMvcConfigurer {
 > implementation 'org.springframework.boot:spring-boot-starter-validation'
 > @Validated 는 스프링 전용 검증 애노테이션이고, @Valid 는 자바 표준 검증 애노테이션이다.
 > 자세한 내용은 다음 Bean Validation에서 설명하겠다.
+
+## Bean Validation
+
+먼저 Bean Validation은 특정한 구현체가 아니라 `Bean Validation 2.0(JSR-380)`이라는 기술 표준이다. 
+쉽게 이야기해서 검증 애노테이션과 여러 인터페이스의 모음이다. 마치 JPA가 표준 기술이고 그 구현체로
+하이버네이트가 있는 것과 같다.
+
+Bean Validation을 구현한 기술중에 일반적으로 사용하는 구현체는 하이버네이트 Validator이다. 이름이
+하이버네이트가 붙어서 그렇지 ORM과는 관련이 없다.
+
+- 하이버네이트 Validator 관련 링크
+  - 공식 사이트: http://hibernate.org/validator/
+  - 공식 메뉴얼: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/
+  - 검증 애노테이션 모음: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/#validator-defineconstraints-spec
+
+- 의존관계 추가
+
+```
+implementation 'org.springframework.boot:spring-boot-starter-validation'
+```
+
+- Jakarta Bean Validation
+  - jakarta.validation-api : Bean Validation 인터페이스
+  - hibernate-validator 구현체
+
+> javax.validation 으로 시작하면 특정 구현에 관계없이 제공되는 표준 인터페이스이고,
+org.hibernate.validator 로 시작하면 하이버네이트 validator 구현체를 사용할 때만 제공되는 검증
+기능이다. 실무에서 대부분 하이버네이트 validator를 사용하므로 자유롭게 사용해도 된다.
+
+- 테스트
+
+```java
+public class BeanValidationTest {
+   @Test
+   void beanValidation() {
+     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+     Validator validator = factory.getValidator();
+     Item item = new Item();
+     item.setItemName(" "); //공백
+     item.setPrice(0);
+     item.setQuantity(10000);
+     Set<ConstraintViolation<Item>> violations = validator.validate(item);
+     for (ConstraintViolation<Item> violation : violations) {
+       System.out.println("violation=" + violation);
+       System.out.println("violation.message=" + violation.getMessage());
+     }
+    }
+}
+```
+
+- 스프링 MVC는 어떻게 Bean Validator를 사용?
+  - 스프링 부트가 spring-boot-starter-validation 라이브러리를 넣으면 자동으로 Bean Validator 를 인지하고 스프링에 통합한다.
+- 스프링 부트는 자동으로 글로벌 Validator로 등록한다.
+  - LocalValidatorFactoryBean 을 글로벌 Validator 로 등록한다. 이 Validator 는 @NotNull 같은
+애노테이션을 보고 검증을 수행한다. 이렇게 글로벌 Validator가 적용되어 있기 때문에, @Valid, @Validated 만 적용하면 된다.
+검증 오류가 발생하면, FieldError, ObjectError 를 생성해서 BindingResult 에 담아준다.
+
+> @Validated 는 스프링 전용 검증 애노테이션이고, @Valid 는 자바 표준 검증 애노테이션이다. 둘중
+아무거나 사용해도 동일하게 작동하지만, @Validated 는 내부에 groups 라는 기능을 포함하고 있다. 이
+부분은 조금 뒤에 다시 설명하겠다.
+
+### 검증 순서
+
+- @ModelAttribute 각각의 필드에 타입 변환 시도
+  1. 성공하면 다음으로
+  2. 실패하면 typeMismatch 로 FieldError 추가
+- Validator 적용
+  - @ModelAttribute 각각의 필드 타입 변환시도 변환에 성공한 필드만 BeanValidation 적용
+
+```
+itemName 에 문자 "A" 입력 타입 변환 성공 -> itemName 필드에 BeanValidation 적용
+price 에 문자 "A" 입력 -> "A"를 숫자 타입 변환 시도 실패 -> typeMismatch FieldError 추가
+price 필드는 BeanValidation 적용 X
+```
+
+### Bean Validation 에러 코드
+
+Bean Validation을 적용하고 bindingResult 에 등록된 검증 오류 코드를 보자.
+오류 코드가 애노테이션 이름으로 등록된다. 마치 typeMismatch 와 유사하다.
+NotBlank 라는 오류 코드를 기반으로 MessageCodesResolver 를 통해 다양한 메시지 코드가 순서대로
+생성된다.
+
+```
+- @NotBlank
+NotBlank.item.itemName
+NotBlank.itemName
+NotBlank.java.lang.String
+NotBlank
+
+- @Range
+Range.item.price
+Range.price
+Range.java.lang.Integer
+Range
+```
+
+오류 코드 메시지 등록
+
+```
+#Bean Validation 추가
+NotBlank={0} 공백X 
+Range={0}, {2} ~ {1} 허용
+Max={0}, 최대 {1}
+```
+
+`{0}` 은 필드명이고, `{1}`, `{2}` ...은 각 애노테이션 마다 다르다.
+
+### Bean Validation 메시지 찾는 순서
+
+1. 생성된 메시지 코드 순서대로 messageSource 에서 메시지 찾기
+2. 애노테이션의 message 속성 사용 @NotBlank(message = "공백! {0}")
+3. 라이브러리가 제공하는 기본 값 사용 공백일 수 없습니다.
