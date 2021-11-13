@@ -2006,6 +2006,14 @@ public String homeLogin(@CookieValue(name = "memberId", required = false) Long m
 
 이번에는 로그아웃 기능을 만들어보자. 로그아웃 방법은 다음과 같다.
 
+```java
+private void expireCookie(HttpServletResponse response, String cookieName) {
+    Cookie cookie = new Cookie(cookieName, null);
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
+}
+```
+
 __세션 쿠키이므로 웹 브라우저 종료시 서버에서 해당 쿠키의 종료 날짜를 0 으로 지정__
 
 로그아웃도 응답 쿠키를 생성하는데 `Max-Age=0` 를 확인할 수 있다. 해당 쿠키는 즉시 종료된다.
