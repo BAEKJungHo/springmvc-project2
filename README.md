@@ -1959,3 +1959,170 @@ HttpMessageConverter 는 @ModelAttribute 와 다르게 각각의 필드 단위�
 
 @RequestBody 는 HttpMessageConverter 단계에서 JSON 데이터를 객체로 변경하지 못하면 이후
 단계 자체가 진행되지 않고 예외가 발생한다. 컨트롤러도 호출되지 않고, Validator도 적용할 수 없다.
+
+## 로그인 처리하기 - [쿠키](https://github.com/BAEKJungHo/inflearn-http#%EC%BF%A0%ED%82%A4) 사용
+
+로그인 상태 유지하기
+로그인의 상태를 어떻게 유지할 수 있을까? 쿼리 파라미터를 계속 유지하면서 보내는 것은 매우 어렵고 번거로운 작업이다. 쿠키를 사용해보자.
+
+쿠키에는 영속 쿠키와 세션 쿠키가 있다.
+
+- 영속 쿠키: 만료 날짜를 입력하면 해당 날짜까지 유지
+- 세션 쿠키: 만료 날짜를 생략하면 브라우저 종료시 까지만 유지
+
+브라우저 종료시 로그아웃이 되길 기대하므로, 우리에게 필요한 것은 세션 쿠키이다
+
+- 쿠키 생성 로직
+
+```java
+Cookie idCookie = new Cookie("memberId", String.valueOf(loginMember.getId()));
+response.addCookie(idCookie);
+```
+
+로그인에 성공하면 쿠키를 생성하고 HttpServletResponse 에 담는다. 쿠키 이름은 memberId 이고, 값은
+회원의 id 를 담아둔다. 웹 브라우저는 종료 전까지 회원의 id 를 서버에 계속 보내줄 것이다.
+
+> 크롬 브라우저를 통해 HTTP 응답 헤더에 쿠키가 추가된 것을 확인할 수 있다.
+
+### 로그아웃 기능
+
+이번에는 로그아웃 기능을 만들어보자. 로그아웃 방법은 다음과 같다.
+
+__세션 쿠키이므로 웹 브라우저 종료시 서버에서 해당 쿠키의 종료 날짜를 0 으로 지정__
+
+로그아웃도 응답 쿠키를 생성하는데 `Max-Age=0` 를 확인할 수 있다. 해당 쿠키는 즉시 종료된다.
+
+### 쿠키와 보안 문제
+
+쿠키를 사용해서 로그인Id를 전달해서 로그인을 유지할 수 있었다. 그런데 여기에는 심각한 보안 문제가
+있다.
+
+- 보안 문제
+  - 쿠키 값은 임의로 변경할 수 있다.
+    - 클라이언트가 쿠키를 강제로 변경하면 다른 사용자가 된다.
+    - 실제 웹브라우저 개발자모드 `Application Cookie` 변경으로 확인
+    - Cookie: memberId=1 Cookie: memberId=2 (다른 사용자의 이름이 보임)
+  - 쿠키에 보관된 정보는 훔쳐갈 수 있다.
+    - 만약 쿠키에 개인정보나, 신용카드 정보가 있다면?
+    - 이 정보가 웹 브라우저에도 보관되고, 네트워크 요청마다 계속 클라이언트에서 서버로 전달된다.
+    - 쿠키의 정보가 나의 로컬 PC가 털릴 수도 있고, 네트워크 전송 구간에서 털릴 수도 있다.
+  - 해커가 쿠키를 한번 훔쳐가면 평생 사용할 수 있다.
+    - 해커가 쿠키를 훔쳐가서 그 쿠키로 악의적인 요청을 계속 시도할 수 있다.
+
+
+- 대안
+  - 쿠키에 중요한 값을 노출하지 않고, `사용자 별로 예측 불가능한 임의의 토큰(랜덤 값)을 노출`하고, 서버에서 토큰과 사용자 id 를 매핑해서 인식한다. 그리고 서버에서 토큰을 관리한다.
+  - 토큰은 해커가 임의의 값을 넣어도 찾을 수 없도록 예상 불가능 해야 한다.
+  - 해커가 토큰을 털어가도 시간이 지나면 사용할 수 없도록 서버에서 해당 토큰의 만료시간을 짧게(Ex. 30분) 유지한다. 또는 해킹이 의심되는 경우 서버에서 해당 토큰을 강제로 제거하면 된다.
+
+## 로그인 처리하기 - 세션 동작 방식
+
+- 세션 ID를 생성하는데, 추정 불가능해야 한다.
+- UUID는 추정이 불가능하다.
+  - Cookie: mySessionId=zz0101xx-bab9-4b92-9b32-dadb280f4b61
+- 생성된 세션 ID와 세션에 보관할 값(memberA)을 서버의 세션 저장소에 보관한다.
+
+__클라이언트와 서버는 결국 쿠키로 연결이 되어야 한다.__
+
+서버는 클라이언트에 mySessionId 라는 이름으로 세션ID 만 쿠키에 담아서 전달한다.
+클라이언트는 쿠키 저장소에 mySessionId 쿠키를 보관한다.
+
+#### 중요
+
+여기서 중요한 포인트는 회원과 관련된 정보는 전혀 클라이언트에 전달하지 않는다는 것이다.
+오직 `추정 불가능한 세션 ID 만 쿠키를 통해 클라이언트에 전달` 한다.
+
+클라이언트는 요청시 항상 mySessionId 쿠키를 전달한다. 서버에서는 클라이언트가 전달한 mySessionId 쿠키 정보로 세션 저장소를 조회해서 로그인시 보관한
+세션 정보를 사용한다.
+
+- 세션을 사용해서 서버에서 중요한 정보를 관리하게 되었다. 덕분에 다음과 같은 보안 문제들을 해결할 수 있다.
+- 쿠키 값을 변조 가능, 예상 불가능한 복잡한 세션Id를 사용한다.
+- 쿠키에 보관하는 정보는 클라이언트 해킹시 털릴 가능성이 있다. 세션 id 가 털려도 여기에는 중요한 정보가 없다.
+- 쿠키 탈취 후 사용 해커가 토큰을 털어가도 시간이 지나면 사용할 수 없도록 서버에서 세션의 만료시간을 짧게(Ex. 30분) 유지한다. 또는 해킹이 의심되는 경우 서버에서 해당 세션을 강제로
+제거하면 된다.
+
+## 로그인 처리하기 - 세션 직접 만들기
+
+- 세션 생성
+  - sessionId 생성 (임의의 추정 불가능한 랜덤 값)
+  - 세션 저장소에 sessionId 와 보관할 값 저장
+  - sessionId로 응답 쿠키를 생성해서 클라이언트에 전달
+- 세션 조회
+  - 클라이언트가 요청한 sessionId 쿠키의 값으로, 세션 저장소에 보관한 값 조회
+- 세션 만료
+  - 클라이언트가 요청한 sessionId 쿠키의 값으로, 세션 저장소에 보관한 sessionId 와 값 제거
+
+- `SessionManager`
+
+```java
+/**
+ * 세션 관리
+ */
+@Component
+public class SessionManager {
+
+    public static final String SESSION_COOKIE_NAME = "mySessionId";
+    private Map<String, Object> sessionStore = new ConcurrentHashMap<>();
+
+    /**
+     * 세션 생성
+     */
+    public void createSession(Object value, HttpServletResponse response) {
+
+        //세션 id를 생성하고, 값을 세션에 저장
+        String sessionId = UUID.randomUUID().toString();
+        sessionStore.put(sessionId, value);
+
+        //쿠키 생성
+        Cookie mySessionCookie = new Cookie(SESSION_COOKIE_NAME, sessionId);
+        response.addCookie(mySessionCookie);
+    }
+
+    /**
+     * 세션 조회
+     */
+    public Object getSession(HttpServletRequest request) {
+        Cookie sessionCookie = findCookie(request, SESSION_COOKIE_NAME);
+        if (sessionCookie == null) {
+            return null;
+        }
+        return sessionStore.get(sessionCookie.getValue());
+    }
+
+    /**
+     * 세션 만료
+     */
+    public void expire(HttpServletRequest request) {
+        Cookie sessionCookie = findCookie(request, SESSION_COOKIE_NAME);
+        if (sessionCookie != null) {
+            sessionStore.remove(sessionCookie.getValue());
+        }
+    }
+
+
+    public Cookie findCookie(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals(cookieName))
+                .findAny()
+                .orElse(null);
+    }
+
+}
+```
+
+#### 정리
+
+이번 시간에는 세션과 쿠키의 개념을 명확하게 이해하기 위해서 직접 만들어보았다. 
+
+__사실 세션이라는 것이 뭔가 특별한 것이 아니라 단지 쿠키를 사용하는데, 서버에서 데이터를 유지하는 방법일 뿐이라는 것을 이해했을 것이다.__
+
+그런데 프로젝트마다 이러한 세션 개념을 직접 개발하는 것은 상당히 불편할 것이다. 그래서 서블릿도 세션 개념을 지원한다.
+이제 직접 만드는 세션 말고, 서블릿이 공식 지원하는 세션을 알아보자. 서블릿이 공식 지원하는 세션은
+우리가 직접 만든 세션과 동작 방식이 거의 같다. 추가로 세션을 일정시간 사용하지 않으면 해당 세션을
+삭제하는 기능을 제공한다.
+
+## 로그인 처리하기 - 서블릿 HTTP 세션1
+
