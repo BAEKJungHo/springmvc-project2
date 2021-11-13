@@ -1979,6 +1979,24 @@ Cookie idCookie = new Cookie("memberId", String.valueOf(loginMember.getId()));
 response.addCookie(idCookie);
 ```
 
+```java
+@GetMapping("/")
+public String homeLogin(@CookieValue(name = "memberId", required = false) Long memberId, Model model) {
+    if (memberId == null) {
+        return "home";
+    }
+
+    // 로그인
+    Member loginMember = memberRepository.findById(memberId);
+    if (loginMember == null) {
+        return "home";
+    }
+
+    model.addAttribute("member", loginMember);
+    return "loginHome";
+}
+```
+
 로그인에 성공하면 쿠키를 생성하고 HttpServletResponse 에 담는다. 쿠키 이름은 memberId 이고, 값은
 회원의 id 를 담아둔다. 웹 브라우저는 종료 전까지 회원의 id 를 서버에 계속 보내줄 것이다.
 
