@@ -1,5 +1,8 @@
 # Inflearn 스프링 MVC 2편 - 백엔드 웹 개발 활용 기술
 
+- [스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](https://github.com/BAEKJungHo/springmvc-project1)
+  - 서블릿, MVC 패턴, 스프링 MVC, 프론트 컨트롤러 패턴 등에 대해서 배울 수 있다.
+
 ## 목차
 
 - [타임리프](https://github.com/BAEKJungHo/springmvc-project2/blob/main/contents/01.%20%ED%83%80%EC%9E%84%EB%A6%AC%ED%94%84(Thymeleaf).md)
