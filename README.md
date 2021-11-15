@@ -14,6 +14,6 @@
 - [로그인 처리(필터, 인터셉터)](https://github.com/BAEKJungHo/springmvc-project2/blob/main/contents/06.%20%EB%A1%9C%EA%B7%B8%EC%9D%B8%20%EC%B2%98%EB%A6%AC(%ED%95%84%ED%84%B0%2C%20%EC%9D%B8%ED%84%B0%EC%85%89%ED%84%B0).md)
 - [ArgumentResolver 를 활용하여 어노테이션 기반 로그인 정보 받기](https://github.com/BAEKJungHo/springmvc-project2/blob/main/contents/07.%20ArgumentResolver%20%EB%A5%BC%20%ED%99%9C%EC%9A%A9%ED%95%98%EC%97%AC%20%EC%96%B4%EB%85%B8%ED%85%8C%EC%9D%B4%EC%85%98%20%EA%B8%B0%EB%B0%98%20%EB%A1%9C%EA%B7%B8%EC%9D%B8%20%EC%A0%95%EB%B3%B4%20%EB%B0%9B%EA%B8%B0.md)
 - [예외 처리와 오류 페이지](https://github.com/BAEKJungHo/springmvc-project2/blob/main/contents/08.%20%EC%98%88%EC%99%B8%20%EC%B2%98%EB%A6%AC%EC%99%80%20%EC%98%A4%EB%A5%98%20%ED%8E%98%EC%9D%B4%EC%A7%80.md)
-- API 예외 처리
+- [API 예외 처리](https://github.com/BAEKJungHo/springmvc-project2/blob/main/contents/09.%20API%20%EC%98%88%EC%99%B8%20%EC%B2%98%EB%A6%AC.md)
 - 스프링 타입 컨버터
 - 파일 업로드
